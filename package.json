@@ -1,14 +1,52 @@
 {
   "name": "nexus-vision-dashboard",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "AI-Powered Security Surveillance Dashboard with real-time object detection visualization, live camera feeds simulation, and intelligent alert management.",
+  "author": {
+    "name": "Imad Nidal Hawara",
+    "url": "https://github.com/imadnidalhawara"
+  },
+  "license": "MIT",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/imadnidalhawara/nexus-vision-dashboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/imadnidalhawara/nexus-vision-dashboard/issues"
+  },
+  "homepage": "https://nexus-vision.vercel.app",
+  "keywords": [
+    "nextjs",
+    "react",
+    "typescript",
+    "tailwindcss",
+    "dashboard",
+    "security",
+    "ai",
+    "object-detection",
+    "yolo",
+    "surveillance",
+    "real-time",
+    "monitoring"
+  ],
+  "engines": {
+    "node": ">=18.17.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "clean": "rm -rf .next out node_modules/.cache",
+    "prepare": "echo 'Ready for development'"
   },
   "dependencies": {
+    "lucide-react": "^1.14.0",
     "next": "16.2.6",
     "react": "19.2.4",
     "react-dom": "19.2.4"
@@ -20,6 +58,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "prettier": "^3.2.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
