@@ -2,7 +2,8 @@
 import { 
   Camera, Users, Activity, Server, Bell, Search, ShieldCheck, Play, Pause,
   Settings, ChevronRight, Clock, AlertTriangle, CheckCircle, Eye, Zap,
-  TrendingUp, TrendingDown, RefreshCw, Download, Maximize2, Volume2, VolumeX
+  TrendingUp, TrendingDown, RefreshCw, Download, Maximize2, Volume2, VolumeX,
+  Menu, X
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 
@@ -116,6 +117,7 @@ export default function NexusVision() {
   const [detectionBoxes, setDetectionBoxes] = useState<DetectionBox[]>([]);
   const [inferenceTime, setInferenceTime] = useState(12.4);
   const [gpuUsage, setGpuUsage] = useState(67);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Real-time clock - initialize on client only to avoid hydration mismatch
   useEffect(() => {
@@ -325,26 +327,53 @@ export default function NexusVision() {
   return (
     <div className="flex h-screen bg-slate-950 font-sans text-slate-200 overflow-hidden">
       
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+      
       {/* SIDEBAR */}
-      <aside className="w-72 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/50 flex flex-col">
-        <div className="p-6 flex items-center gap-3 border-b border-slate-700/50">
-          <div className="relative">
-            <ShieldCheck className="text-blue-500 w-10 h-10" />
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-900 animate-pulse" />
+      <aside className={`
+        fixed lg:relative inset-y-0 left-0 z-50
+        w-72 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/50 flex flex-col
+        transform transition-transform duration-300 ease-in-out
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        <div className="p-6 flex items-center justify-between border-b border-slate-700/50">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <ShieldCheck className="text-blue-500 w-10 h-10" />
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-900 animate-pulse" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-white tracking-tight">
+                Nexus<span className="text-blue-500">Vision</span>
+              </h1>
+              <p className="text-[10px] text-slate-500 font-mono">AI-POWERED SECURITY</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">
-              Nexus<span className="text-blue-500">Vision</span>
-            </h1>
-            <p className="text-[10px] text-slate-500 font-mono">AI-POWERED SECURITY</p>
-          </div>
+          {/* Close button for mobile */}
+          <button 
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden p-2 hover:bg-slate-800/50 rounded-xl transition"
+            aria-label="Close sidebar"
+          >
+            <X className="w-5 h-5 text-slate-400" />
+          </button>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveNav(item.id)}
+              onClick={() => {
+                setActiveNav(item.id);
+                setSidebarOpen(false); // Close sidebar on mobile after selection
+              }}
               className={`w-full flex items-center gap-3 p-4 rounded-xl font-medium transition-all duration-200 ${
                 activeNav === item.id
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
@@ -394,41 +423,55 @@ export default function NexusVision() {
             <span>System v2.4.1 • Stable</span>
             <RefreshCw className="w-3 h-3 cursor-pointer hover:text-white transition" />
           </div>
-          <p className="mt-1">Built by Imad Nidal Hawara © 2024</p>
+          <p className="mt-1">Built by Imad Nidal Hawara © 2026</p>
         </div>
       </aside>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col min-w-0">
         
         {/* TOP NAV */}
-        <header className="h-16 bg-slate-900/95 backdrop-blur-xl border-b border-slate-800/50 px-8 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h2 className="text-2xl font-semibold text-white">AI Detection Center</h2>
-            <div className="flex items-center gap-2 text-xs text-slate-500 font-mono bg-slate-800/50 px-3 py-1.5 rounded-lg">
+        <header className="h-auto min-h-16 bg-slate-900/95 backdrop-blur-xl border-b border-slate-800/50 px-4 md:px-8 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            {/* Mobile menu button */}
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 hover:bg-slate-800/50 rounded-xl transition"
+              aria-label="Open sidebar"
+            >
+              <Menu className="w-6 h-6 text-slate-400" />
+            </button>
+            <h2 className="text-lg sm:text-2xl font-semibold text-white truncate">AI Detection Center</h2>
+            <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500 font-mono bg-slate-800/50 px-3 py-1.5 rounded-lg">
               <Clock className="w-3.5 h-3.5" />
               {formatTime(currentTime)}
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
-            <div className="relative">
+          <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-end">
+            {/* Search - hidden on very small screens, icon only on small, full on medium+ */}
+            <div className="relative hidden md:block">
               <Search className="w-5 h-5 absolute left-4 top-3 text-slate-400" />
               <input 
                 type="text" 
                 placeholder="Search detection logs..." 
-                className="bg-slate-800/50 border border-slate-700/50 pl-11 pr-6 py-2.5 w-80 rounded-2xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-500" 
+                className="bg-slate-800/50 border border-slate-700/50 pl-11 pr-6 py-2.5 w-48 lg:w-80 rounded-2xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-500" 
               />
             </div>
+            
+            {/* Search icon for small screens */}
+            <button className="md:hidden p-2 hover:bg-slate-800/50 rounded-xl transition">
+              <Search className="w-5 h-5 text-slate-400" />
+            </button>
 
             <div className="relative">
               <button 
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="relative p-2 hover:bg-slate-800/50 rounded-xl transition"
               >
-                <Bell className="w-6 h-6 text-slate-400 hover:text-white transition" />
+                <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400 hover:text-white transition" />
                 {alertCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs flex items-center justify-center rounded-full font-bold">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-red-500 text-white text-[10px] sm:text-xs flex items-center justify-center rounded-full font-bold">
                     {alertCount}
                   </span>
                 )}
@@ -436,7 +479,7 @@ export default function NexusVision() {
 
               {/* Notifications Dropdown */}
               {showNotifications && (
-                <div className="absolute right-0 top-12 w-80 bg-slate-900 border border-slate-700/50 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                <div className="absolute right-0 top-12 w-72 sm:w-80 bg-slate-900 border border-slate-700/50 rounded-2xl shadow-2xl z-50 overflow-hidden">
                   <div className="p-4 border-b border-slate-700/50">
                     <h3 className="font-semibold">Notifications</h3>
                   </div>
@@ -445,14 +488,14 @@ export default function NexusVision() {
                       [...Array(alertCount)].map((_, i) => (
                         <div key={i} className="p-4 border-b border-slate-800/50 hover:bg-slate-800/30 transition">
                           <div className="flex items-start gap-3">
-                            <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5" />
-                            <div className="flex-1">
+                            <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium">Security Alert #{i + 1}</p>
                               <p className="text-xs text-slate-400 mt-1">Unusual activity detected at Camera {i + 1}</p>
                             </div>
                             <button 
                               onClick={dismissAlert}
-                              className="text-xs text-blue-400 hover:text-blue-300"
+                              className="text-xs text-blue-400 hover:text-blue-300 flex-shrink-0"
                             >
                               Dismiss
                             </button>
@@ -470,36 +513,37 @@ export default function NexusVision() {
               )}
             </div>
             
-            <div className="flex items-center gap-3 bg-slate-800/50 px-4 py-2 rounded-2xl border border-slate-700/50 hover:border-slate-600 transition cursor-pointer">
-              <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center font-bold text-sm shadow-lg shadow-blue-500/25">
+            {/* User profile - simplified on small screens */}
+            <div className="flex items-center gap-2 sm:gap-3 bg-slate-800/50 px-2 sm:px-4 py-2 rounded-2xl border border-slate-700/50 hover:border-slate-600 transition cursor-pointer">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/25">
                 IH
               </div>
-              <div>
+              <div className="hidden sm:block">
                 <p className="text-sm font-medium">Imad Hawara</p>
                 <p className="text-[10px] text-emerald-400 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
                   Online
                 </p>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-500 ml-2" />
+              <ChevronRight className="w-4 h-4 text-slate-500 hidden sm:block" />
             </div>
           </div>
         </header>
 
-        <div className="flex-1 p-8 overflow-auto space-y-6 bg-gradient-to-br from-slate-950 to-slate-900">
+        <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto space-y-4 md:space-y-6 bg-gradient-to-br from-slate-950 to-slate-900">
           
           {/* METRICS */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
             {metrics.map((item, i) => (
               <div 
                 key={i} 
-                className="bg-slate-900/80 backdrop-blur border border-slate-800/50 rounded-2xl p-6 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300 group"
+                className="bg-slate-900/80 backdrop-blur border border-slate-800/50 rounded-xl md:rounded-2xl p-3 md:p-6 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300 group"
               >
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`p-2.5 rounded-xl bg-slate-800/50 ${item.color}`}>
-                    {item.icon}
+                <div className="flex items-center justify-between mb-2 md:mb-4">
+                  <div className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl bg-slate-800/50 ${item.color}`}>
+                    <span className="[&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-5 md:[&>svg]:h-5">{item.icon}</span>
                   </div>
-                  <div className={`flex items-center gap-1 text-xs ${
+                  <div className={`flex items-center gap-1 text-[10px] md:text-xs ${
                     item.trend === 'up' ? 'text-emerald-400' : 
                     item.trend === 'down' ? 'text-red-400' : 'text-slate-400'
                   }`}>
@@ -507,58 +551,58 @@ export default function NexusVision() {
                     {item.trend === 'down' && <TrendingDown className="w-3 h-3" />}
                   </div>
                 </div>
-                <p className="text-slate-400 text-sm font-medium">{item.title}</p>
-                <p className={`text-3xl font-bold mt-2 mb-1 ${item.color} tracking-tight`}>{item.value}</p>
-                <p className="text-xs text-slate-500">{item.change}</p>
+                <p className="text-slate-400 text-xs md:text-sm font-medium truncate">{item.title}</p>
+                <p className={`text-xl md:text-3xl font-bold mt-1 md:mt-2 mb-0.5 md:mb-1 ${item.color} tracking-tight`}>{item.value}</p>
+                <p className="text-[10px] md:text-xs text-slate-500 truncate">{item.change}</p>
               </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
             {/* LIVE AI FEED */}
-            <div className="lg:col-span-2 bg-slate-900/80 backdrop-blur border border-slate-800/50 rounded-2xl overflow-hidden">
-              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/50">
-                <div className="flex items-center gap-4">
+            <div className="lg:col-span-2 bg-slate-900/80 backdrop-blur border border-slate-800/50 rounded-xl md:rounded-2xl overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-3 md:px-6 py-3 md:py-4 border-b border-slate-800/50 gap-3">
+                <div className="flex items-center gap-2 md:gap-4 flex-wrap">
                   <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${isRecording ? 'bg-red-500 animate-pulse' : 'bg-slate-500'}`} />
-                    <span className={`font-mono text-sm font-bold ${isRecording ? 'text-red-400' : 'text-slate-400'}`}>
+                    <div className={`w-2.5 md:w-3 h-2.5 md:h-3 rounded-full ${isRecording ? 'bg-red-500 animate-pulse' : 'bg-slate-500'}`} />
+                    <span className={`font-mono text-xs md:text-sm font-bold ${isRecording ? 'text-red-400' : 'text-slate-400'}`}>
                       {isRecording ? 'LIVE' : 'PAUSED'}
                     </span>
                   </div>
-                  <div className="h-4 w-px bg-slate-700" />
-                  <h3 className="text-sm font-semibold">Main Entrance Camera</h3>
-                  <span className="text-xs text-slate-500 bg-slate-800/50 px-2 py-1 rounded-lg font-mono">YOLOv8</span>
+                  <div className="h-4 w-px bg-slate-700 hidden sm:block" />
+                  <h3 className="text-xs md:text-sm font-semibold">Main Entrance</h3>
+                  <span className="text-[10px] md:text-xs text-slate-500 bg-slate-800/50 px-1.5 md:px-2 py-0.5 md:py-1 rounded-lg font-mono">YOLOv8</span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 md:gap-2 w-full sm:w-auto justify-end">
                   <button
                     onClick={() => setIsMuted(!isMuted)}
-                    className="p-2 hover:bg-slate-800/50 rounded-xl transition"
+                    className="p-1.5 md:p-2 hover:bg-slate-800/50 rounded-lg md:rounded-xl transition"
                     aria-label={isMuted ? "Unmute" : "Mute"}
                   >
                     {isMuted ? <VolumeX className="w-4 h-4 text-slate-400" /> : <Volume2 className="w-4 h-4 text-slate-400" />}
                   </button>
-                  <button className="p-2 hover:bg-slate-800/50 rounded-xl transition" aria-label="Fullscreen">
+                  <button className="p-1.5 md:p-2 hover:bg-slate-800/50 rounded-lg md:rounded-xl transition" aria-label="Fullscreen">
                     <Maximize2 className="w-4 h-4 text-slate-400" />
                   </button>
-                  <button className="p-2 hover:bg-slate-800/50 rounded-xl transition" aria-label="Download">
+                  <button className="p-1.5 md:p-2 hover:bg-slate-800/50 rounded-lg md:rounded-xl transition hidden sm:block" aria-label="Download">
                     <Download className="w-4 h-4 text-slate-400" />
                   </button>
                   <button
                     onClick={() => setIsRecording(!isRecording)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                    className={`flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all ${
                       isRecording 
                         ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30' 
                         : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30'
                     }`}
                   >
-                    {isRecording ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                    {isRecording ? 'Pause' : 'Start'}
+                    {isRecording ? <Pause className="w-3 h-3 md:w-4 md:h-4" /> : <Play className="w-3 h-3 md:w-4 md:h-4" />}
+                    <span className="hidden sm:inline">{isRecording ? 'Pause' : 'Start'}</span>
                   </button>
                 </div>
               </div>
 
-              <div className="relative h-[400px] bg-black flex items-center justify-center overflow-hidden">
+              <div className="relative h-[250px] sm:h-[300px] md:h-[400px] bg-black flex items-center justify-center overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
                   src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=2070&auto=format&fit=crop" 
@@ -666,49 +710,49 @@ export default function NexusVision() {
                     })}
 
                     {/* Detection count indicator */}
-                    <div className="absolute top-4 right-4 bg-black/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-slate-700/50">
-                      <div className="flex items-center gap-2 text-xs font-mono">
-                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                        <span className="text-slate-400">Detections:</span>
+                    <div className="absolute top-2 md:top-4 right-2 md:right-4 bg-black/80 backdrop-blur-sm px-2 md:px-3 py-1 md:py-2 rounded-lg border border-slate-700/50">
+                      <div className="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-xs font-mono">
+                        <div className="w-1.5 md:w-2 h-1.5 md:h-2 bg-emerald-500 rounded-full animate-pulse" />
+                        <span className="text-slate-400 hidden sm:inline">Detections:</span>
                         <span className="text-white font-bold">{detectionBoxes.length}</span>
                       </div>
                     </div>
 
                     {/* Model info overlay */}
-                    <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-slate-700/50">
-                      <div className="text-[10px] font-mono space-y-1">
-                        <div className="flex items-center gap-2">
+                    <div className="absolute top-2 md:top-4 left-2 md:left-4 bg-black/80 backdrop-blur-sm px-2 md:px-3 py-1 md:py-2 rounded-lg border border-slate-700/50">
+                      <div className="text-[9px] md:text-[10px] font-mono space-y-0.5 md:space-y-1">
+                        <div className="flex items-center gap-1 md:gap-2">
                           <span className="text-blue-400">MODEL</span>
                           <span className="text-white">YOLOv8x</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-slate-500">Inference:</span>
+                        <div className="flex items-center gap-1 md:gap-2">
+                          <span className="text-slate-500 hidden sm:inline">Inference:</span>
                           <span className="text-emerald-400">{inferenceTime.toFixed(1)}ms</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Stats Overlay */}
-                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                      <div className="bg-black/80 backdrop-blur-sm px-4 py-2.5 rounded-xl font-mono text-xs flex items-center gap-4 border border-slate-700/50">
-                        <span className="text-red-400 flex items-center gap-1.5">
-                          <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                    {/* Stats Overlay - simplified on mobile */}
+                    <div className="absolute bottom-2 md:bottom-4 left-2 md:left-4 right-2 md:right-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+                      <div className="bg-black/80 backdrop-blur-sm px-2 md:px-4 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-mono text-[10px] md:text-xs flex items-center gap-2 md:gap-4 border border-slate-700/50">
+                        <span className="text-red-400 flex items-center gap-1 md:gap-1.5">
+                          <span className="w-1.5 md:w-2 h-1.5 md:h-2 bg-red-500 rounded-full animate-pulse" />
                           REC
                         </span>
-                        <div className="h-4 w-px bg-slate-700" />
+                        <div className="h-3 md:h-4 w-px bg-slate-700" />
                         <span className="text-slate-300">FPS: <span className="text-white font-bold">{fps.toFixed(1)}</span></span>
-                        <div className="h-4 w-px bg-slate-700" />
-                        <span className="text-slate-300">4K <span className="text-slate-500">2160p</span></span>
-                        <div className="h-4 w-px bg-slate-700" />
-                        <span className="text-slate-300">GPU: <span className="text-cyan-400 font-bold">{gpuUsage}%</span></span>
+                        <div className="h-3 md:h-4 w-px bg-slate-700 hidden sm:block" />
+                        <span className="text-slate-300 hidden sm:inline">4K</span>
+                        <div className="h-3 md:h-4 w-px bg-slate-700 hidden md:block" />
+                        <span className="text-slate-300 hidden md:inline">GPU: <span className="text-cyan-400 font-bold">{gpuUsage}%</span></span>
                       </div>
-                      <div className="bg-black/80 backdrop-blur-sm px-4 py-2.5 rounded-xl font-mono text-xs border border-slate-700/50 flex items-center gap-3">
-                        <div className="flex items-center gap-2">
+                      <div className="bg-black/80 backdrop-blur-sm px-2 md:px-4 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-mono text-[10px] md:text-xs border border-slate-700/50 flex items-center gap-2 md:gap-3 justify-center sm:justify-start">
+                        <div className="flex items-center gap-1 md:gap-2">
                           <span className="text-emerald-400">Conf:</span>
                           <span className="text-white font-bold">{modelConfidence.toFixed(1)}%</span>
                         </div>
-                        <div className="h-4 w-px bg-slate-700" />
-                        <div className="flex items-center gap-1">
+                        <div className="h-3 md:h-4 w-px bg-slate-700 hidden sm:block" />
+                        <div className="hidden sm:flex items-center gap-1">
                           {Object.entries(DETECTION_CLASSES).slice(0, 3).map(([key, config]) => (
                             <div 
                               key={key}
@@ -750,38 +794,38 @@ export default function NexusVision() {
             </div>
 
             {/* RECENT DETECTIONS */}
-            <div className="bg-slate-900/80 backdrop-blur border border-slate-800/50 rounded-2xl overflow-hidden">
-              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/50">
-                <h3 className="font-semibold">Recent Detections</h3>
+            <div className="bg-slate-900/80 backdrop-blur border border-slate-800/50 rounded-xl md:rounded-2xl overflow-hidden">
+              <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-slate-800/50">
+                <h3 className="font-semibold text-sm md:text-base">Recent Detections</h3>
                 <button className="text-xs text-blue-400 hover:text-blue-300 transition">View All</button>
               </div>
-              <div className="divide-y divide-slate-800/50 max-h-[400px] overflow-auto">
+              <div className="divide-y divide-slate-800/50 max-h-[300px] md:max-h-[400px] overflow-auto">
                 {detectionLogs.map((log) => (
-                  <div key={log.id} className="p-4 hover:bg-slate-800/30 transition cursor-pointer group">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                  <div key={log.id} className="p-3 md:p-4 hover:bg-slate-800/30 transition cursor-pointer group">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2 md:gap-3 min-w-0">
+                        <div className={`w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0 ${
                           log.type === 'Person' ? 'bg-blue-500/20 text-blue-400' :
                           log.type === 'Vehicle' ? 'bg-purple-500/20 text-purple-400' :
                           log.type === 'Package' ? 'bg-orange-500/20 text-orange-400' :
                           'bg-emerald-500/20 text-emerald-400'
                         }`}>
-                          {log.type === 'Person' ? <Users className="w-5 h-5" /> :
-                           log.type === 'Vehicle' ? <Server className="w-5 h-5" /> :
-                           <Eye className="w-5 h-5" />}
+                          {log.type === 'Person' ? <Users className="w-4 h-4 md:w-5 md:h-5" /> :
+                           log.type === 'Vehicle' ? <Server className="w-4 h-4 md:w-5 md:h-5" /> :
+                           <Eye className="w-4 h-4 md:w-5 md:h-5" />}
                         </div>
-                        <div>
-                          <p className="font-medium text-sm">{log.type} Detected</p>
-                          <p className="text-xs text-slate-500">{log.camera}</p>
+                        <div className="min-w-0">
+                          <p className="font-medium text-xs md:text-sm truncate">{log.type} Detected</p>
+                          <p className="text-[10px] md:text-xs text-slate-500 truncate">{log.camera}</p>
                         </div>
                       </div>
-                      <span className={`text-[10px] px-2 py-1 rounded-full border font-medium ${getStatusColor(log.status)}`}>
+                      <span className={`text-[9px] md:text-[10px] px-1.5 md:px-2 py-0.5 md:py-1 rounded-full border font-medium flex-shrink-0 ${getStatusColor(log.status)}`}>
                         {log.status.toUpperCase()}
                       </span>
                     </div>
-                    <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+                    <div className="mt-2 md:mt-3 flex items-center justify-between text-[10px] md:text-xs text-slate-500">
                       <span className="font-mono">{formatTime(log.timestamp)}</span>
-                      <span className="text-emerald-400 font-mono">{log.confidence}% confidence</span>
+                      <span className="text-emerald-400 font-mono">{log.confidence}%</span>
                     </div>
                   </div>
                 ))}
