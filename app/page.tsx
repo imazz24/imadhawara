@@ -118,6 +118,16 @@ export default function NexusVision() {
   const [inferenceTime, setInferenceTime] = useState(12.4);
   const [gpuUsage, setGpuUsage] = useState(67);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(1024); // Default to desktop
+
+  // Track window width for responsive detection boxes
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    // Set initial width
+    setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Real-time clock - initialize on client only to avoid hydration mismatch
   useEffect(() => {
@@ -615,6 +625,10 @@ export default function NexusVision() {
                     {/* Professional AI Detection Boxes */}
                     {detectionBoxes.map((box) => {
                       const classConfig = DETECTION_CLASSES[box.type];
+                      // Scale box dimensions based on viewport - smaller on mobile
+                      const scaleFactor = windowWidth < 640 ? 0.5 : windowWidth < 768 ? 0.65 : 0.85;
+                      const scaledWidth = box.width * scaleFactor;
+                      const scaledHeight = box.height * scaleFactor;
                       return (
                         <div
                           key={box.id}
@@ -622,30 +636,32 @@ export default function NexusVision() {
                           style={{
                             left: `${box.x}%`,
                             top: `${box.y}%`,
-                            width: `${box.width}px`,
-                            height: `${box.height}px`,
+                            width: `${scaledWidth}px`,
+                            height: `${scaledHeight}px`,
+                            maxWidth: '40%',
+                            maxHeight: '50%',
                           }}
                         >
                           {/* Corner brackets - professional YOLO style */}
                           <div className="absolute inset-0">
                             {/* Top-left corner */}
                             <div 
-                              className="absolute top-0 left-0 w-4 h-4 border-l-2 border-t-2"
+                              className="absolute top-0 left-0 w-2 h-2 sm:w-3 sm:h-3 md:w-4 md:h-4 border-l-2 border-t-2"
                               style={{ borderColor: box.color }}
                             />
                             {/* Top-right corner */}
                             <div 
-                              className="absolute top-0 right-0 w-4 h-4 border-r-2 border-t-2"
+                              className="absolute top-0 right-0 w-2 h-2 sm:w-3 sm:h-3 md:w-4 md:h-4 border-r-2 border-t-2"
                               style={{ borderColor: box.color }}
                             />
                             {/* Bottom-left corner */}
                             <div 
-                              className="absolute bottom-0 left-0 w-4 h-4 border-l-2 border-b-2"
+                              className="absolute bottom-0 left-0 w-2 h-2 sm:w-3 sm:h-3 md:w-4 md:h-4 border-l-2 border-b-2"
                               style={{ borderColor: box.color }}
                             />
                             {/* Bottom-right corner */}
                             <div 
-                              className="absolute bottom-0 right-0 w-4 h-4 border-r-2 border-b-2"
+                              className="absolute bottom-0 right-0 w-2 h-2 sm:w-3 sm:h-3 md:w-4 md:h-4 border-r-2 border-b-2"
                               style={{ borderColor: box.color }}
                             />
                           </div>
@@ -656,28 +672,29 @@ export default function NexusVision() {
                             style={{ backgroundColor: classConfig.color }}
                           />
 
-                          {/* Detection label */}
+                          {/* Detection label - responsive sizing */}
                           <div 
-                            className="absolute -top-6 left-0 flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold tracking-wide shadow-lg"
+                            className="absolute -top-4 sm:-top-5 md:-top-6 left-0 flex items-center gap-0.5 sm:gap-1 md:gap-1.5 px-1 sm:px-1.5 md:px-2 py-0.5 rounded text-[8px] sm:text-[9px] md:text-[10px] font-mono font-bold tracking-wide shadow-lg whitespace-nowrap"
                             style={{ 
                               backgroundColor: box.color,
                               color: 'white',
                             }}
                           >
-                            <span>{classConfig.label}</span>
-                            <span className="opacity-80">•</span>
-                            <span>{box.confidence.toFixed(1)}%</span>
+                            <span className="hidden sm:inline">{classConfig.label}</span>
+                            <span className="sm:hidden">{classConfig.label.slice(0, 3)}</span>
+                            <span className="opacity-80 hidden sm:inline">•</span>
+                            <span>{box.confidence.toFixed(0)}%</span>
                           </div>
 
-                          {/* Tracking info overlay */}
-                          <div className="absolute -bottom-5 left-0 flex items-center gap-2 text-[9px] font-mono">
+                          {/* Tracking info overlay - hidden on very small screens */}
+                          <div className="absolute -bottom-4 sm:-bottom-5 left-0 hidden sm:flex items-center gap-1 sm:gap-2 text-[8px] sm:text-[9px] font-mono">
                             <span 
-                              className="px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-sm"
+                              className="px-1 sm:px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-sm whitespace-nowrap"
                               style={{ color: box.color }}
                             >
-                              ID: {box.trackingId}
+                              {box.trackingId}
                             </span>
-                            <span className="px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-sm text-slate-400">
+                            <span className="px-1 sm:px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-sm text-slate-400 hidden md:inline">
                               {box.type === 'person' ? '🚶' : box.type === 'vehicle' ? '🚗' : box.type === 'face' ? '👤' : '📦'}
                             </span>
                           </div>
@@ -695,8 +712,8 @@ export default function NexusVision() {
                             </div>
                           )}
 
-                          {/* Confidence bar */}
-                          <div className="absolute -right-1 top-0 bottom-0 w-1 bg-black/50 rounded-full overflow-hidden">
+                          {/* Confidence bar - hidden on mobile */}
+                          <div className="absolute -right-1 top-0 bottom-0 w-1 bg-black/50 rounded-full overflow-hidden hidden sm:block">
                             <div 
                               className="absolute bottom-0 w-full rounded-full transition-all duration-300"
                               style={{ 
